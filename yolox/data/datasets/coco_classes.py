@@ -3,6 +3,13 @@
 # Copyright (c) Megvii, Inc. and its affiliates.
 
 COCO_CLASSES = (
+    "head_nohelmet",
+    "helmet",
+    "person",
+    "vest",
+)
+
+COCO_CLASSES_ = (
     "person",
     "bicycle",
     "car",
