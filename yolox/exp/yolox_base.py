@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf-8 -*-
 # Copyright (c) Megvii Inc. All rights reserved.
 
 import os
@@ -10,6 +9,8 @@ import torch.distributed as dist
 import torch.nn as nn
 
 from .base_exp import BaseExp
+
+__all__ = ["Exp", "check_exp_value"]
 
 
 class Exp(BaseExp):
@@ -74,7 +75,7 @@ class Exp(BaseExp):
         self.warmup_lr = 0
         self.min_lr_ratio = 0.05
         # learning rate for one image. During training, lr will multiply batchsize.
-        self.basic_lr_per_img = 0.01 / 64.0
+        self.basic_lr_per_img = 0.01 / 32.0
         # name of LRScheduler
         self.scheduler = "yoloxwarmcos"
         # last #epoch to close augmention like mosaic
@@ -303,7 +304,7 @@ class Exp(BaseExp):
         return COCODataset(
             data_dir=self.data_dir,
             json_file=self.val_ann if not testdev else self.test_ann,
-            name="val2017" if not testdev else "test2017",
+            name="val" if not testdev else "test",
             img_size=self.test_size,
             preproc=ValTransform(legacy=legacy),
         )
@@ -350,3 +351,8 @@ class Exp(BaseExp):
 
     def eval(self, model, evaluator, is_distributed, half=False, return_outputs=False):
         return evaluator.evaluate(model, is_distributed, half, return_outputs=return_outputs)
+
+
+def check_exp_value(exp: Exp):
+    h, w = exp.input_size
+    assert h % 32 == 0 and w % 32 == 0, "input size must be multiples of 32"
