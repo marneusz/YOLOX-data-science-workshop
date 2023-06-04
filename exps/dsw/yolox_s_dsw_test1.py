@@ -27,12 +27,29 @@ class Exp(MyExp):
         self.eval_interval = 1
         self.print_interval = 25
 
-        # --------------- transform config ----------------- #
-        self.scale = (0.1, 2)
-        self.mosaic_scale = (0.8, 1.6)
-        self.shear = 2.0
-        self.perspective = 0.0
-        self.enable_mixup = True
+        self.save_history_ckpt = False
 
         # ---------------
-        self.basic_lr_per_img = 0.01 / 32.0
+        self.basic_lr_per_img = 0.01 / 16.0
+
+        # --------------- transform config ----------------- #
+        self.scale = (0.1, 2)
+
+        self.mosaic_prob = 0.5
+        self.mosaic_scale = (0.5, 2)
+
+        self.enable_mixup = True
+        self.mixup_prob = 0.5
+
+        self.hsv_prob = 0.5
+
+        self.flip_prob = 0.5
+
+        # rotation angle range, for example, if set to 2, the true range is (-2, 2)
+        self.degrees = 10.0
+        # translate range, for example, if set to 0.1, the true range is (-0.1, 0.1)
+        self.translate = 0.1
+        self.mixup_scale = (0.5, 1.5)
+        # shear angle range, for example, if set to 2, the true range is (-2, 2)
+        self.shear = 2.0
+
