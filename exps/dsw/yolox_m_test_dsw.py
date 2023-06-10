@@ -10,8 +10,8 @@ from yolox.exp import Exp as MyExp
 class Exp(MyExp):
     def __init__(self):
         super(Exp, self).__init__()
-        self.depth = 1.0
-        self.width = 1.0
+        self.depth = 0.67
+        self.width = 0.75
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
 
         # Define yourself dataset path
@@ -21,7 +21,7 @@ class Exp(MyExp):
 
         self.num_classes = 4
 
-        self.max_epoch = 100
+        self.max_epoch = 50
         self.data_num_workers = 8
         self.eval_interval = 1
         self.print_interval = 25
@@ -36,4 +36,4 @@ class Exp(MyExp):
         self.enable_mixup = True
 
         # ---------------
-        self.basic_lr_per_img = 0.01 / 16.0
+        self.basic_lr_per_img = 0.01 / 64.0
