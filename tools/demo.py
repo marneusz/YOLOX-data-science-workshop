@@ -3,6 +3,7 @@
 # Copyright (c) Megvii, Inc. and its affiliates.
 
 import argparse
+import json
 import os
 import time
 from loguru import logger
@@ -17,6 +18,8 @@ from yolox.exp import get_exp
 from yolox.utils import fuse_model, get_model_info, postprocess, vis
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
+
+VOC_CLASSES = ("face",)
 
 
 def make_parser():
@@ -159,8 +162,11 @@ class Predictor(object):
             if self.decoder is not None:
                 outputs = self.decoder(outputs, dtype=outputs.type())
             outputs = postprocess(
-                outputs, self.num_classes, self.confthre,
-                self.nmsthre, class_agnostic=True
+                outputs,
+                self.num_classes,
+                self.confthre,
+                self.nmsthre,
+                class_agnostic=True,
             )
             logger.info("Infer time: {:.4f}s".format(time.time() - t0))
         return outputs, img_info
@@ -180,6 +186,33 @@ class Predictor(object):
         cls = output[:, 6]
         scores = output[:, 4] * output[:, 5]
 
+        person_output = output[cls == 0.0]
+        person_bboxes = []
+        for bb in person_output:
+            x0, y0, x1, y1 = bb[:4]
+            h, w = (y1 - y0), (x1 - x0)
+            person_bboxes.append(
+                {
+                    "image_name": img_info["file_name"],
+                    "category_id": 1,
+                    "bbox": [int(x0), int(y0), int(w), int(h)],
+                    "area": int(w) * int(h),
+                    "segmentation": [],
+                    "iscrowd": 0,
+                }
+            )
+        save_folder = os.path.join(
+            img_info["vis_folder"],
+            time.strftime("%Y_%m_%d_%H_%M_%S", img_info["current_time"]),
+        )
+        os.makedirs(save_folder, exist_ok=True)
+        save_file_name = os.path.join(
+            save_folder, os.path.splitext(img_info["file_name"])[0] + ".json"
+        )
+
+        with open(save_file_name, "w") as outfile:
+            json.dump({"annotations": person_bboxes}, outfile)
+
         vis_res = vis(img, bboxes, scores, cls, cls_conf, self.cls_names)
         return vis_res
 
@@ -192,12 +225,14 @@ def image_demo(predictor, vis_folder, path, current_time, save_result):
     files.sort()
     for image_name in files:
         outputs, img_info = predictor.inference(image_name)
+        img_info["vis_folder"] = vis_folder
+        img_info["current_time"] = current_time
         result_image = predictor.visual(outputs[0], img_info, predictor.confthre)
         if save_result:
             save_folder = os.path.join(
                 vis_folder, time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
             )
-            os.makedirs(save_folder, exist_ok=True)
+            # os.makedirs(save_folder, exist_ok=True)
             save_file_name = os.path.join(save_folder, os.path.basename(image_name))
             logger.info("Saving detection result in {}".format(save_file_name))
             cv2.imwrite(save_file_name, result_image)
@@ -303,8 +338,14 @@ def main(exp, args):
         decoder = None
 
     predictor = Predictor(
-        model, exp, COCO_CLASSES, trt_file, decoder,
-        args.device, args.fp16, args.legacy,
+        model,
+        exp,
+        COCO_CLASSES,
+        trt_file,
+        decoder,
+        args.device,
+        args.fp16,
+        args.legacy,
     )
     current_time = time.localtime()
     if args.demo == "image":
