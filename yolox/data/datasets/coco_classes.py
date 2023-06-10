@@ -2,14 +2,14 @@
 # -*- coding:utf-8 -*-
 # Copyright (c) Megvii, Inc. and its affiliates.
 
-COCO_CLASSES = (
-    "head_nohelmet",
-    "helmet",
-    "person",
-    "vest",
-)
+# COCO_CLASSES = (
+#     "head_nohelmet",
+#     "helmet",
+#     "person",
+#     "vest",
+# )
 
-COCO_CLASSES_ = (
+COCO_CLASSES = (
     "person",
     "bicycle",
     "car",
