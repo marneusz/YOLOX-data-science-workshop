@@ -36,4 +36,4 @@ class Exp(MyExp):
         self.enable_mixup = True
 
         # ---------------
-        self.basic_lr_per_img = 0.01 / 16.0
+        self.basic_lr_per_img = 0.01 / 8.0
