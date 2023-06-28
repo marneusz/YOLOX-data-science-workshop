@@ -105,7 +105,12 @@ class Predictor(object):
         self,
         model,
         exp,
-        cls_names=COCO_CLASSES,
+        cls_names=(
+            "head_nohelmet",
+            "helmet",
+            "person",
+            "vest",
+        ),
         trt_file=None,
         decoder=None,
         device="cpu",
@@ -340,7 +345,12 @@ def main(exp, args):
     predictor = Predictor(
         model,
         exp,
-        COCO_CLASSES,
+        (
+            "head_nohelmet",
+            "helmet",
+            "person",
+            "vest",
+        ),
         trt_file,
         decoder,
         args.device,
